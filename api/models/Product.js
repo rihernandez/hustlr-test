@@ -1,141 +1,135 @@
-const mongoose = require("mongoose");
-const URLSlugs = require('mongoose-url-slugs');
-const { districts } = require("../middleware/common");
-const Schema = mongoose.Schema;
-const productSchema = mongoose.Schema({
+const mongoose = require('mongoose');
+
+const productSchema = new mongoose.Schema({
     name: {
         type: String,
-        trim: true,
-        required: true,
-        maxlength: 128
+        required: [true, "Please enter product name"],
+        trim: true
     },
-    brand: {
-        type: Schema.Types.ObjectId,
-        ref: 'productbrand'
-    },
-    quantity: {
-        type: Number,
-        trim: true,
-        required: true,
-        maxlength: 32
-    },
-    category: [{
-        type: Schema.Types.ObjectId,
-        ref: 'category'
-    }],
-    averageRating:{
-        type: mongoose.Decimal128
-    },
-    totalRatingUsers:{
-        type: Number
-    },
-    soldBy: {
-        type: Schema.Types.ObjectId,
-        ref: 'admin'
-    },
-    images: [{
-        type: Schema.Types.ObjectId,
-        ref: 'productimages'
-    }],
-    warranty: {
-        type: String,
-        trim: true,
-        required: true,
-        maxlength: 32
-    },
-    return: {
-        type: String,
-        required: true,
-        trim: true,
-        maxlength: 32
-    },
-    size: [{
-        type: String,
-        trim: true,
-        maxlength: 32
-    }],
-    model: {
-        type: String,
-        trim: true,
-        maxlength: 128
-    },
-    color: [{
-        type: String,
-        trim: true,
-        maxlength: 128
-    }],
-    weight: [{
-        type: String,
-        trim: true,
-        maxlength: 128
-    }],
     description: {
         type: String,
-        required: true,
-        trim: true,
-        maxlength: 2000
+        required: [true, "Please enter product description"]
     },
     highlights: {
         type: String,
-        required: true,
-        trim: true,
-        maxlength: 2000
+        required: true
     },
-    tags: [{
-        type: String
-    }],
+    specifications: [
+        {
+            title: {
+                type: String,
+                required: true
+            },
+            description: {
+                type: String,
+                required: true
+            }
+        }
+    ],
     price: {
-        type: mongoose.Decimal128,
-        required:true
-    },
-    discountRate: {
-        type: Number,//it may b float as well..
-        default:0
-    },
-    videoURL:[{
-        type:String
-    }],
-    isVerified: {
-        type: Date,
-        default: null
-    },
-    isRejected: {
-        type: Date,
-        default: null
-    },
-    isDeleted: {
-        type: Date,
-        default: null
-    },
-    isFeatured: {
-        type: Date,
-        default: null
-    },
-    viewsCount: {
         type: Number,
-        default: 0,
+        required: [true, "Please enter product price"]
     },
-    trendingScore: {
-        type: mongoose.Decimal128,
+    cuttedPrice: {
+        type: Number,
         default: 0
     },
-    noOfSoldOut: {
+    images: [
+        {
+            public_id: {
+                type: String,
+                required: true
+            },
+            url: {
+                type: String,
+                required: true
+            }
+        }
+    ],
+    brand: {
+        name: {
+            type: String,
+            required: false
+        },
+        logo: {
+            public_id: {
+                type: String,
+                required: false,
+            },
+            url: {
+                type: String,
+                required: false,
+            }
+        }
+    },
+    category: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: "Category",
+            required: true
+        }
+    ],
+    stock: {
         type: Number,
-        default: 0,
+        required: [true, "Please enter product stock"],
+        maxlength: [4, "Stock cannot exceed limit"],
+        default: 1
     },
-    slug: {
-        type: String,
-        unique: true
+    quantity: {
+        type: Number,
+        default: 1
     },
-    availableDistricts:[{
+    warranty: {
         type: String,
-        enum: districts,
+        default: "1 year"
+    },
+    return: {
+        type: String,
+        default: "7 days"
+    },
+    availableDistricts: [{
+        type: String,
         required: true
     }],
-    remark: [{
-        type: Schema.Types.ObjectId,
-        ref: 'remark'
-    }],
-}, { timestamps: true });
-productSchema.plugin(URLSlugs('name', { field: 'slug', update: true }));
-module.exports = mongoose.model("product", productSchema);
+    ratings: {
+        type: Number,
+        default: 0
+    },
+    numOfReviews: {
+        type: Number,
+        default: 0
+    },
+    reviews: [
+        {
+            user: {
+                type: mongoose.Schema.ObjectId,
+                ref: "User",
+                required: false
+            },
+            name: {
+                type: String,
+                required: true
+            },
+            rating: {
+                type: Number,
+                required: true
+            },
+            comment: {
+                type: String,
+                required: true
+            }
+        }
+    ],
+
+    user: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+        required: false
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+module.exports = mongoose.model('Product', productSchema);

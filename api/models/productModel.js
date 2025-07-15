@@ -51,21 +51,21 @@ const productSchema = new mongoose.Schema({
     brand: {
         name: {
             type: String,
-            required: true
+            required: false
         },
         logo: {
             public_id: {
                 type: String,
-                required: true,
+                required: false,
             },
             url: {
                 type: String,
-                required: true,
+                required: false,
             }
         }
     },
     category: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: [true, "Please enter product category"]
     },
     stock: {
@@ -111,7 +111,7 @@ const productSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.ObjectId,
         ref: "User",
-        required: true
+        required: false
     },
     createdAt: {
         type: Date,

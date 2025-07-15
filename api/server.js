@@ -9,7 +9,7 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
 });
 
-// connectDatabase();
+connectDatabase();
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -28,3 +28,6 @@ process.on('unhandledRejection', (err) => {
         process.exit(1);
     });
 });
+
+
+

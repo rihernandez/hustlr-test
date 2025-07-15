@@ -3,6 +3,7 @@ const asyncErrorHandler = require('../middlewares/helpers/asyncErrorHandler');
 const SearchFeatures = require('../utils/searchFeatures');
 const ErrorHandler = require('../utils/errorHandler');
 const cloudinary = require('cloudinary');
+const mongoose = require("mongoose");
 
 // Get All Products
 exports.getAllProducts = asyncErrorHandler(async (req, res, next) => {
@@ -117,6 +118,107 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
         product
     });
 });
+
+
+// Create Product -- Admin (Simple Version) without images and aunthentication (Cause it supose to be public)
+exports.createProductSimple = asyncErrorHandler(async (req, res, next) => {
+  const {
+    name,
+    quantity,
+    category,
+    warranty,
+    return: returnPolicy,
+    description,
+    highlights,
+    price,
+    availableDistricts,
+    brand 
+  } = req.body;
+
+  if (
+    !name ||
+    !quantity ||
+    !category ||
+    !warranty ||
+    !returnPolicy ||
+    !description ||
+    !highlights ||
+    !price ||
+    !availableDistricts
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: 'Missing required fields'
+    });
+  }
+
+  let categoryObjectIds;
+  try {
+    if (!Array.isArray(category)) {
+      throw new Error('Category must be an array of IDs');
+    }
+    categoryObjectIds = category.map(id => new mongoose.Types.ObjectId(id));
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: 'Category contains invalid ObjectId(s)'
+    });
+  }
+
+  const productData = {
+    name,
+    quantity,
+    stock: quantity,
+    category: categoryObjectIds,
+    warranty: warranty,
+    return: returnPolicy,
+    description,
+    highlights,
+    price,
+    cuttedPrice: price,
+    availableDistricts,
+    images: [],
+    specifications: []
+  };
+
+  if (
+    brand &&
+    typeof brand === 'object' &&
+    brand.name &&
+    brand.logo &&
+    brand.logo.public_id &&
+    brand.logo.url
+  ) {
+    productData.brand = {
+      name: brand.name,
+      logo: {
+        public_id: brand.logo.public_id,
+        url: brand.logo.url
+      }
+    };
+  }
+
+  if (req.user && req.user._id) {
+    productData.user = req.user._id;
+  }
+   console.log('Product to create:', productData);
+
+  try {
+    console.log('Product to create:', productData);
+    const product = await Product.create(productData);
+    res.status(201).json({
+      success: true,
+      product
+    });
+  } catch (error) {
+    console.error('Error creating product:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error creating product: ' + error.message
+    });
+  }
+});
+
 
 // Update Product ---ADMIN
 exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
